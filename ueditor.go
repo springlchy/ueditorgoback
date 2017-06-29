@@ -63,7 +63,7 @@ type Stat interface {
 func init() {
 	serverPath = getCurrentPath()
 	ueditorConfig = make(UEditorConfig)
-	readConfig("/plugins/ueditor/php/config.json") // path of your config.json
+	readConfig("/conf/ueditor_config.json") // path of your config.json; Fix issue #1
 }
 
 /** 2. uncomment this if you want to use it with beego
