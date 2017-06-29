@@ -63,7 +63,7 @@ type Stat interface {
 func init() {
 	serverPath = getCurrentPath()
 	ueditorConfig = make(UEditorConfig)
-	readConfig("/plugins/ueditor/php/config.json")
+	readConfig("/plugins/ueditor/php/config.json") // path of your config.json
 }
 
 /** 2. uncomment this if you want to use it with beego
@@ -309,8 +309,26 @@ func (this *Uploader) getFullName() string {
 	format = strings.Replace(format, "{ss}", strconv.Itoa(t.Second()), 1)
 	format = strings.Replace(format, "{time}", strconv.FormatInt(t.Unix(), 10), 1)
 
-	randNum := strconv.Itoa(rand.Intn(10000000)+10000000)
-	format = format + randNum
+	reg := regexp.MustCompile("{rand:[0-9]+}")
+	randstrs := reg.FindAllString(format, -1)
+
+	// Begin fix issue #2
+	randNum := ""
+	if len(randstrs) != 0 {
+		//只考虑第一个{rand:n}
+		reg = regexp.MustCompile("[0-9]+")
+		digitNumber, err := strconv.Atoi(reg.FindAllString(randstrs[0], -1)[0])
+		if err == nil {
+			for i := 1; i <= digitNumber; i++ {
+				randNum += strconv.Itoa(rand.Intn(10))
+			}
+			fmt.Println("randNum:" + randNum)
+			format = strings.Replace(format, randstrs[0], randNum, 1)
+		}
+	}
+	//randNum := strconv.Itoa(rand.Intn(10000000)+10000000)
+	//format = format + randNum
+	// End fix issue #2
 
 	return format + this.getFileExt()
 }
